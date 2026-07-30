@@ -30,4 +30,52 @@ Alternatives: `Duplicate`, `Cannot reproduce`, `Won't fix / accepted risk`, or `
 **Evidence:** Attach trace and network response  
 **Notes:** Reproduce three times; compare API catalog availability; do not file until observed.
 
-No fabricated issues are presented as findings in this portfolio. Actual findings require reproducible evidence.
+## Observed defect DEF-001
+
+**Title:** `[API][Security] Book lookup without ISBN exposes server stack trace`
+**Severity:** Sev-2 High (information disclosure and unhandled server error)
+**Endpoint:** `GET /BookStore/v1/Book` without the `ISBN` query parameter
+**Expected:** HTTP 400 with a stable, non-sensitive validation payload
+**Actual:** HTTP 500 HTML response containing Sequelize, filesystem paths and internal source locations
+**Reproducibility:** Confirmed by Playwright and an independent HTTP request on 2026-07-30
+**Automation:** `API-004` is retained as an expected failure using `test.fail`; an unexpected pass will fail the suite and signal that the defect may be fixed.
+**Recommendation:** Validate `ISBN` before querying, return the documented error envelope and suppress production stack traces.
+
+## Observed defect DEF-002
+
+**Title:** `[Accessibility] Critical controls and brand images have no accessible names`
+**Severity:** Sev-2 High (blocks screen-reader operation of critical navigation/search controls)
+**Pages:** Catalog, Login and Registration
+**Expected:** WCAG 2 A critical controls and meaningful images expose accessible names/alternatives
+**Actual:** axe reports `button-name`, `image-alt` and `link-name` violations with critical/serious impact
+**Reproducibility:** Confirmed independently on all three public pages on 2026-07-30
+**Automation:** `A11Y-001..003` remain expected failures. If any page unexpectedly passes, CI fails to require review and removal/narrowing of the defect marker.
+**Recommendation:** Name the icon-only search button, add useful `alt` text to the brand image, and give the linked logo an accessible name.
+
+No other illustrative issue is presented as a live finding. Actual findings require reproducible evidence.
+
+## Remediated supply-chain finding DEF-003
+
+**Title:** `[SCA][Tooling] High-severity brace-expansion DoS in lint dependency chain`
+**Severity:** High (`GHSA-mh99-v99m-4gvg`)
+**Detection:** `pnpm audit --audit-level high` identified the vulnerable transitive path through ESLint/minimatch.
+**Remediation:** Updated the ESLint toolchain to the patched major version and regenerated the frozen lockfile.
+**Verification:** The High/Critical audit is now a blocking job in `Security Gate`; local audit and lint must both pass.
+
+## Observed defect DEF-004
+
+**Title:** `[Headers][Information disclosure] Missing baseline headers and exposed implementation versions`
+**Severity:** Sev-3 Medium
+**Expected:** UI/API responses use HSTS, CSP and `nosniff` where applicable and suppress implementation/version headers.
+**Actual:** Responses expose `X-Powered-By: Express` and an nginx version; the UI lacks HSTS, CSP and `X-Content-Type-Options`.
+**Automation:** `SEC-001/002` remain expected failures and will require review if the target behavior changes.
+**Recommendation:** Remove framework/version headers at proxy and application layers, enable HSTS after HTTPS coverage review, define a restrictive CSP and send `nosniff` consistently.
+
+## Observed defect DEF-005
+
+**Title:** `[API][Method handling] Unsupported PATCH request returns HTTP 200`
+**Severity:** Sev-3 Medium
+**Expected:** An unsupported method returns HTTP 404/405 and never looks successful.
+**Actual:** `PATCH /BookStore/v1/Books` with an empty body returns HTTP 200, while the endpoint's OPTIONS response does not list PATCH in `Allow`.
+**Automation:** `SEC-006` remains an expected failure asserting the desired 404/405 contract.
+**Recommendation:** Reject unsupported methods before SPA/fallback routing and return a consistent API error envelope with an accurate `Allow` header.

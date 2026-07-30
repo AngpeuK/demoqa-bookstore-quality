@@ -11,7 +11,7 @@ Production-style quality engineering project for the [DemoQA Book Store](https:/
 ## What this project demonstrates
 
 - Risk-based test strategy, scope, entry/exit criteria and release gates
-- Traceable manual test cases for UI and REST API
+- 55 traceable automated checks across UI, REST API, DevSecOps, security and accessibility
 - TypeScript + Playwright page objects and typed API clients
 - Independent test data and cleanup for mutating API scenarios
 - Smoke vs. regression tagging and layered execution
@@ -27,6 +27,8 @@ Production-style quality engineering project for the [DemoQA Book Store](https:/
 | UI smoke       | Catalog and authentication     | render, search, invalid login                     |
 | UI regression  | Navigation and edge states     | details, no-result state                          |
 | Non-functional | Assessed/documented            | accessibility, security, reliability, performance |
+
+Current executable suite: **55 checks in 13 spec files** — 35 API/contract/security and 20 UI/accessibility. Seven checks are intentional expected failures linked to reproducible product defects; they fail CI if the behavior unexpectedly changes so the defect marker must be reviewed.
 
 The detailed mapping is in [traceability.md](docs/traceability.md).
 
@@ -69,11 +71,14 @@ docs/                  strategy, cases, traceability and operations
 ```
 
 Assertions stay in tests, interaction details stay in clients/page objects, and test-owned users are always cleaned in `finally`. Authentication state is not shared between workers.
+Concurrency is deliberately capped at two workers to respect the shared DemoQA environment and avoid turning external throttling into false product failures.
 
 ## CI model
 
 - **Pull request / push:** static quality gates plus `@smoke` tests
 - **Nightly / manual:** complete UI and API regression
+- **Known-defect policy:** expected failures stay executable and traceable to `DEF-001/002/004/005`
+- **Security Gate:** CodeQL SAST, High/Critical SCA, Gitleaks, dependency review and SPDX SBOM
 - **Failure evidence:** Playwright HTML report, JUnit XML, traces, screenshots and videos
 - **External dependency policy:** retries are limited to CI; failures are never silently ignored
 
@@ -89,6 +94,8 @@ See [test-plan.md](docs/test-plan.md) for release criteria and [ci-triage.md](do
 - [CI failure triage](docs/ci-triage.md)
 - [Release checklist](docs/release-checklist.md)
 - [Architecture decisions](docs/adr/001-test-architecture.md)
+- [Threat model](docs/threat-model.md)
+- [Security policy](SECURITY.md)
 
 ## Engineering judgement
 
