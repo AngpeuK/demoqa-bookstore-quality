@@ -67,7 +67,7 @@ jobs:
           languages: javascript-typescript
           queries: security-extended
       - name: Analyze
-        uses: github/codeql-action/analyze@bce182f857edf1feab116e9795a3393d21977282 # v4
+        uses: github/codeql-action/analyze@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4
         with:
           category: /language:javascript-typescript
 
@@ -85,7 +85,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Syft SBOM generator
         id: syft
-        uses: anchore/sbom-action/download-syft@f6c3d0fe42c3cf876e3462574e4c9416b5e0f07a # v0.9.0
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
       - name: Generate SPDX software bill of materials
         run: ${{ steps.syft.outputs.cmd }} . --output spdx-json=sbom.spdx.json
       - name: Publish SBOM artifact
