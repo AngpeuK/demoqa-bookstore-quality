@@ -53,3 +53,29 @@ Alternatives: `Duplicate`, `Cannot reproduce`, `Won't fix / accepted risk`, or `
 **Recommendation:** Name the icon-only search button, add useful `alt` text to the brand image, and give the linked logo an accessible name.
 
 No other illustrative issue is presented as a live finding. Actual findings require reproducible evidence.
+
+## Remediated supply-chain finding DEF-003
+
+**Title:** `[SCA][Tooling] High-severity brace-expansion DoS in lint dependency chain`
+**Severity:** High (`GHSA-mh99-v99m-4gvg`)
+**Detection:** `pnpm audit --audit-level high` identified the vulnerable transitive path through ESLint/minimatch.
+**Remediation:** Updated the ESLint toolchain to the patched major version and regenerated the frozen lockfile.
+**Verification:** The High/Critical audit is now a blocking job in `Security Gate`; local audit and lint must both pass.
+
+## Observed defect DEF-004
+
+**Title:** `[Headers][Information disclosure] Missing baseline headers and exposed implementation versions`
+**Severity:** Sev-3 Medium
+**Expected:** UI/API responses use HSTS, CSP and `nosniff` where applicable and suppress implementation/version headers.
+**Actual:** Responses expose `X-Powered-By: Express` and an nginx version; the UI lacks HSTS, CSP and `X-Content-Type-Options`.
+**Automation:** `SEC-001/002` remain expected failures and will require review if the target behavior changes.
+**Recommendation:** Remove framework/version headers at proxy and application layers, enable HSTS after HTTPS coverage review, define a restrictive CSP and send `nosniff` consistently.
+
+## Observed defect DEF-005
+
+**Title:** `[API][Method handling] Unsupported PATCH request returns HTTP 200`
+**Severity:** Sev-3 Medium
+**Expected:** An unsupported method returns HTTP 404/405 and never looks successful.
+**Actual:** `PATCH /BookStore/v1/Books` with an empty body returns HTTP 200, while the endpoint's OPTIONS response does not list PATCH in `Allow`.
+**Automation:** `SEC-006` remains an expected failure asserting the desired 404/405 contract.
+**Recommendation:** Reject unsupported methods before SPA/fallback routing and return a consistent API error envelope with an accurate `Allow` header.

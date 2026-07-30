@@ -71,3 +71,17 @@ Priority: P0 critical, P1 high, P2 normal. Automation IDs map directly to test t
 | A11Y-001 | Catalog      | No serious/critical axe violations | Expected failure: DEF-002 |
 | A11Y-002 | Login        | No serious/critical axe violations | Expected failure: DEF-002 |
 | A11Y-003 | Registration | No serious/critical axe violations | Expected failure: DEF-002 |
+
+## DevSecOps and passive security checks
+
+| ID      | Control                       | Expected result                                        | Status                    |
+| ------- | ----------------------------- | ------------------------------------------------------ | ------------------------- |
+| SEC-001 | Implementation fingerprinting | Framework/server versions suppressed                   | Expected failure: DEF-004 |
+| SEC-002 | Browser security headers      | HSTS, CSP and `nosniff` present                        | Expected failure: DEF-004 |
+| SEC-003 | CORS preflight                | Arbitrary origin receives no wildcard/credential trust | Automated                 |
+| SEC-004 | Error token handling          | Supplied bearer canary is never reflected              | Automated                 |
+| SEC-005 | Injection-like ISBN           | Treated as data; 400 without SQL/stack details         | Automated                 |
+| SEC-006 | Unsupported method            | 404/405, never success or server error                 | Expected failure: DEF-005 |
+| SEC-007 | Transport enforcement         | Plain HTTP redirects to HTTPS                          | Automated                 |
+
+Pipeline controls: CodeQL `security-extended`, Gitleaks full-history scan, High/Critical dependency audit, PR dependency/license review, immutable action pinning, Dependabot and SPDX JSON SBOM.

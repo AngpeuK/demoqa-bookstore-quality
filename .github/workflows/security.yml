@@ -1,0 +1,92 @@
+name: Security Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '41 4 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    name: Secret scanning / Gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Scan repository history
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependencies:
+    name: SCA / dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Block High/Critical vulnerable dependencies
+        run: pnpm audit --audit-level high
+      - name: Review dependency changes
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-3.0, AGPL-3.0
+
+  codeql:
+    name: SAST / CodeQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@bce182f857edf1feab116e9795a3393d21977282 # v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+      - name: Analyze
+        uses: github/codeql-action/analyze@bce182f857edf1feab116e9795a3393d21977282 # v4
+        with:
+          category: /language:javascript-typescript
+
+  sbom:
+    name: Supply chain / SBOM
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Generate SPDX software bill of materials
+        uses: anchore/sbom-action@f6c3d0fe42c3cf876e3462574e4c9416b5e0f07a # v0.9.0
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom.spdx.json
+          artifact-name: sbom-spdx-${{ github.run_id }}
