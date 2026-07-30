@@ -59,6 +59,8 @@ Automation follows the lowest useful layer; UI tests exist only where rendering/
 
 Mutating tests generate unique usernames. Cleanup executes in `finally`. Credentials may be provided only through environment variables or CI secrets.
 
+Execution is capped at two workers because the shared public environment resets connections during account-heavy bursts. Network retries are bounded and used only at safe setup/cleanup boundaries; assertions are never retried in test code.
+
 ## 6. Entry criteria
 
 - Target UI and API are reachable over HTTPS.

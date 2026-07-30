@@ -20,4 +20,9 @@ export class LoginPage extends BasePage {
     await this.page.getByPlaceholder('Password').fill(password);
     await this.page.getByRole('button', { name: 'Login', exact: true }).click();
   }
+
+  public async loginSuccessfully(username: string, password: string): Promise<void> {
+    await this.login(username, password);
+    await expect(this.page).toHaveURL(/\/profile$/);
+  }
 }

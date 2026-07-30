@@ -28,4 +28,23 @@ export class BookStoreClient {
       params: { UserId: userId },
     });
   }
+
+  public async deleteBook(userId: string, token: string, isbn: string): Promise<APIResponse> {
+    return this.request.delete('/BookStore/v1/Book', {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { isbn, userId },
+    });
+  }
+
+  public async replaceBook(
+    userId: string,
+    token: string,
+    currentIsbn: string,
+    replacementIsbn: string,
+  ): Promise<APIResponse> {
+    return this.request.put(`/BookStore/v1/Books/${currentIsbn}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { userId, isbn: replacementIsbn },
+    });
+  }
 }
