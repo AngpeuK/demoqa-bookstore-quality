@@ -32,7 +32,7 @@ The detailed mapping is in [traceability.md](docs/traceability.md).
 
 ## Quick start
 
-Prerequisites: Node.js 20+.
+Prerequisites: Node.js 22.13+.
 
 ```bash
 corepack enable
