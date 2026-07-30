@@ -1,7 +1,7 @@
 # DemoQA Book Store — Quality Engineering Portfolio
 
 [![Playwright](https://img.shields.io/badge/Playwright-TypeScript-45ba4b?logo=playwright)](https://playwright.dev/)
-[![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088ff?logo=githubactions)](.github/workflows/quality.yml)
+[![Quality Gate](https://github.com/AngpeuK/demoqa-bookstore-quality/actions/workflows/quality.yml/badge.svg)](https://github.com/AngpeuK/demoqa-bookstore-quality/actions/workflows/quality.yml)
 [![Quality](https://img.shields.io/badge/quality-risk--based-blue)](docs/test-plan.md)
 
 Production-style quality engineering project for the [DemoQA Book Store](https://demoqa.com/books). It demonstrates how I approach quality as an engineering system: risks drive coverage, every automated check traces to a test case, API and UI layers are intentionally separated, and CI produces evidence useful for release decisions.
