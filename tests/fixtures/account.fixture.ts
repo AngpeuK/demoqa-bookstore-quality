@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { test as base, expect } from '@playwright/test';
 import { AccountClient } from '../../src/api/account.client.js';
 import { BookStoreClient } from '../../src/api/book-store.client.js';
@@ -19,7 +20,7 @@ interface CreatedUser {
 
 export const test = base.extend<AccountFixtures>({
   account: async ({ request }, use) => {
-    const suffix = `${Date.now()}_${Math.floor(Math.random() * 1_000_000)}`;
+    const suffix = `${Date.now()}_${randomUUID().replaceAll('-', '').slice(0, 12)}`;
     const username = `qa_${suffix}`;
     const password = `Pw!${suffix}aZ`;
     const accounts = new AccountClient(request);
